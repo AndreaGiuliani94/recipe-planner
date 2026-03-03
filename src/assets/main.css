@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* 4. Personalizzazioni globali (Opzionale) */
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Rende le transizioni di Headless UI più fluide */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+}

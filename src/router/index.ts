@@ -1,8 +1,27 @@
+import HomeView from '@/views/HomeView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [],
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/nuova-ricetta',
+      name: 'add-recipe',
+      // Caricamento pigro (lazy-loading) per performance migliori
+      component: () => import('../views/AddRecipeViews.vue')
+    },
+    {
+      path: '/shopping-chart',
+      name: 'shopping-chart',
+      // Caricamento pigro (lazy-loading) per performance migliori
+      component: () => import('../views/ShoppingListView.vue')
+    }
+  ]
 })
 
 export default router

@@ -1,11 +1,19 @@
-<script setup lang="ts"></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <header>
+    <nav>
+      <RouterLink to="/">Planner</RouterLink> | 
+      <RouterLink to="/nuova-ricetta">Nuova Ricetta</RouterLink>  | 
+      <RouterLink to="/shopping-chart">Carrello della spesa</RouterLink>
+    </nav>
+  </header>
+
+  <main>
+    <RouterView />
+  </main>
 </template>
 
-<style scoped></style>
+<style>
+nav { padding: 20px; text-align: center; }
+nav a { font-weight: bold; color: #2c3e50; text-decoration: none; margin: 0 10px; }
+nav a.router-link-exact-active { color: #42b983; }
+</style>

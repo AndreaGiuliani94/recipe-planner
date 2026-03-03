@@ -11,6 +11,11 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.23",
+    "@heroicons/vue": "^2.2.0",
+    "@supabase/supabase-js": "^2.98.0",
+    "@tailwindcss/vite": "^4.2.1",
+    "date-fns": "^4.1.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.29",
     "vue-router": "^5.0.3"
@@ -20,7 +25,10 @@
     "@types/node": "^24.11.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.8.1",
+    "autoprefixer": "^10.4.27",
     "npm-run-all2": "^8.0.4",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-vue-devtools": "^8.0.6",
