@@ -1,129 +1,127 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { supabase } from '../lib/supabaseClient'
 import { format, addDays } from 'date-fns'
-import { ShoppingCartIcon, CheckCircleIcon, ArchiveBoxIcon } from '@heroicons/vue/24/outline'
+import { ShoppingCartIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { it } from 'date-fns/locale'
-
-interface ShoppingItem {
-  name: string
-  quantity: string
-  owned: boolean
-}
+import type { ShoppingItem } from '@/types'
 
 const shoppingList = ref<ShoppingItem[]>([])
 const isLoading = ref(true)
 
-const generateList = async () => {
-  isLoading.value = true
-  const today = new Date()
-  const start = format(today, 'yyyy-MM-dd')
-  const end = format(addDays(today, 6), 'yyyy-MM-dd')
+const groupedShoppingList = computed(() => {
+  const groups: Record<string, ShoppingItem[]> = {}
 
-  // 1. Recuperiamo i pasti con le loro ricette e RELATIVI INGREDIENTI in una sola chiamata
-  const { data: plannerData, error } = await supabase
-    .from('planner')
-    .select(`
-      date,
-      recipe_id,
-      recipes (
-        id,
-        ingredients (
-          name,
-          quantity
-        )
-      )
-    `)
-    .gte('date', start)
-    .lte('date', end)
-    .order('date', { ascending: true })
-
-  if (error || !plannerData) {
-    isLoading.value = false
-    return
-  }
-
-  // 2. Aggreghiamo gli ingredienti tenendo conto dei duplicati del planner
-  const aggregated: Record<string, ShoppingItem> = {}
-
-  plannerData.forEach(entry => {
-    // Verifichiamo che la ricetta e gli ingredienti esistano
-    const recipeIngredients = (entry.recipes as any)?.ingredients
-    
-    if (recipeIngredients) {
-      recipeIngredients.forEach((ing: any) => {
-        const key = ing.name.toLowerCase().trim()
-        
-        if (aggregated[key]) {
-          // Se l'ingrediente c'è già (da un'altra ricetta o dallo stesso piatto ripetuto)
-          aggregated[key].quantity += ` + ${ing.quantity}`
-        } else {
-          aggregated[key] = {
-            name: ing.name,
-            quantity: ing.quantity,
-            owned: false
-          }
-        }
-      })
-    }
+  shoppingList.value.forEach(item => {
+    const name = item.name.toLowerCase().trim()
+    if (!groups[name]) groups[name] = []
+    groups[name].push(item)
   })
 
-  shoppingList.value = Object.values(aggregated)
+  return groups
+})
+
+const syncWithPlanner = async () => {
+  isLoading.value = true
+
+  const start = format(new Date(), 'yyyy-MM-dd')
+  const end = format(addDays(new Date(), 6), 'yyyy-MM-dd')
+
+  // 1. Recupera i pasti dal planner
+  const { data: plannerData } = await supabase
+    .from('planner')
+    .select('recipes(ingredients(name, quantity))')
+    .gte('date', start).lte('date', end)
+
+  // 2. Estrai tutti gli ingredienti "necessari" (senza sommarli, mantenendoli distinti)
+  const neededIngredients: { name: string, quantity: string }[] = []
+  plannerData?.forEach(p => {
+    const ings = (p.recipes as any)?.ingredients
+    if (ings) neededIngredients.push(...ings)
+  })
+
+  // 3. Recupera ciò che è già presente nella tabella shopping_list
+  const { data: existingItems } = await supabase.from('shopping_list').select('*')
+
+  // 4. Identifica i nuovi ingredienti che non sono ancora nella tabella DB
+  for (const ing of neededIngredients) {
+    const exists = existingItems?.find(ei =>
+      ei.name.toLowerCase() === ing.name.toLowerCase() &&
+      ei.quantity === ing.quantity
+    )
+
+    if (!exists) {
+      await supabase.from('shopping_list').insert([{
+        name: ing.name.toLowerCase(),
+        quantity: ing.quantity,
+        is_owned: false
+      }])
+    }
+  }
+
+  // 5. Pulisci gli ingredienti vecchi (opzionale: potresti voler cancellare quelli non più nel planner)
+
+  // Ricarica la lista finale dal DB
+  const { data: finalData } = await supabase.from('shopping_list').select('*').order('is_owned', { ascending: true })
+  shoppingList.value = finalData || []
   isLoading.value = false
 }
 
-onMounted(generateList)
+const toggleOwned = async (item: ShoppingItem) => {
+  const newStatus = !item.is_owned
+  item.is_owned = newStatus // Update locale immediato per velocità UI
+
+  await supabase
+    .from('shopping_list')
+    .update({ is_owned: newStatus })
+    .eq('id', item.id)
+}
+
+const clearList = async () => {
+  if (confirm("Vuoi svuotare tutta la lista della spesa?")) {
+    await supabase.from('shopping_list').delete().neq('id', '00000000-0000-0000-0000-000000000000') // Delete all
+    shoppingList.value = []
+  }
+}
+
+onMounted(syncWithPlanner)
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-4 py-8">
-    <div class="flex items-center gap-3 mb-8">
-      <div class="bg-emerald-500 p-3 rounded-2xl shadow-lg shadow-emerald-200">
-        <ShoppingCartIcon class="h-8 w-8 text-white" />
-      </div>
-      <div>
-        <h1 class="text-3xl font-extrabold text-gray-900">Lista della Spesa</h1>
-        <p class="text-sm text-gray-500 font-medium">
-          Dal {{ format(new Date(), 'dd MMM', { locale: it }) }} 
-          al {{ format(addDays(new Date(), 6), 'dd MMM', { locale: it }) }}
-        </p>
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="bg-emerald-600 p-3 rounded-2xl shadow-lg shadow-emerald-200">
+          <ShoppingCartIcon class="h-7 w-7 text-white" />
+        </div>
+        <div>
+          <h1 class="text-2xl font-extrabold text-gray-900">Lista della Spesa</h1>
+          <p class="text-sm text-gray-500 font-medium">
+            Dal {{ format(new Date(), 'dd MMM', { locale: it }) }}
+            al {{ format(addDays(new Date(), 6), 'dd MMM', { locale: it }) }}
+          </p>
+        </div>
       </div>
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <ArrowPathIcon class="h-8 w-8 text-emerald-500 animate-spin" />
     </div>
 
-    <div v-else-if="shoppingList.length === 0" class="text-center py-16 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-      <ArchiveBoxIcon class="h-12 w-12 text-gray-300 mx-auto mb-4" />
-      <p class="text-gray-500 font-medium">Il tuo carrello è vuoto.<br>Pianifica qualche pasto nel planner!</p>
-    </div>
+    <div v-else class="space-y-4">
+      <div v-for="(items, name) in groupedShoppingList" :key="name"
+        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex flex-col gap-3">
+          <h3 class="font-bold text-gray-800 capitalize text-lg">{{ name }}</h3>
 
-    <div v-else class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="divide-y divide-gray-50">
-        <div 
-          v-for="(item, index) in shoppingList" 
-          :key="index"
-          @click="item.owned = !item.owned"
-          class="flex items-center p-5 hover:bg-emerald-50/30 transition-colors cursor-pointer group"
-          :class="{ 'bg-gray-50/50': item.owned }"
-        >
-          <div class="mr-4">
-            <div 
-              class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all"
-              :class="item.owned ? 'bg-emerald-500 border-emerald-500' : 'border-gray-200 group-hover:border-emerald-300'"
-            >
-              <CheckCircleIcon v-if="item.owned" class="h-5 w-5 text-white" />
-            </div>
-          </div>
-
-          <div class="flex-1">
-            <h3 class="font-bold text-gray-800 transition-all capitalize" :class="{ 'line-through text-gray-400': item.owned }">
-              {{ item.name }}
-            </h3>
-            <p class="text-sm font-medium" :class="item.owned ? 'text-gray-300' : 'text-emerald-600'">
+          <div class="flex flex-wrap gap-2">
+            <button v-for="item in items" :key="item.id" @click="toggleOwned(item)"
+              class="flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 transition-all text-sm font-bold" :class="item.is_owned
+                ? 'bg-emerald-500 border-emerald-500 text-white shadow-inner'
+                : 'bg-white border-gray-100 text-gray-600 hover:border-emerald-300'">
+              <CheckCircleIcon v-if="item.is_owned" class="h-4 w-4" />
               {{ item.quantity }}
-            </p>
+            </button>
           </div>
         </div>
       </div>

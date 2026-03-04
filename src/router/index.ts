@@ -10,13 +10,13 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/nuova-ricetta',
-      name: 'add-recipe',
+      path: '/ricette',
+      name: 'recipes',
       // Caricamento pigro (lazy-loading) per performance migliori
-      component: () => import('../views/AddRecipeViews.vue')
+      component: () => import('../views/RecipesListView.vue')
     },
     {
-      path: '/shopping-chart',
+      path: '/spesa',
       name: 'shopping-chart',
       // Caricamento pigro (lazy-loading) per performance migliori
       component: () => import('../views/ShoppingListView.vue')

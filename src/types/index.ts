@@ -17,7 +17,8 @@ export interface PlanEntry {
 }
 
 export interface ShoppingItem {
+  id?: string
   name: string
   quantity: string
-  owned: boolean
+  is_owned: boolean
 }
