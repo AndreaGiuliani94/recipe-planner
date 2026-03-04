@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { supabase } from '../lib/supabaseClient'
-import { MagnifyingGlassIcon, BookOpenIcon, BeakerIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
+import { MagnifyingGlassIcon, BookOpenIcon, PlusIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import AddRecipeModal from '@/components/AddRecipeModal.vue'
 
 const recipes = ref<any[]>([])
@@ -107,6 +107,15 @@ onMounted(fetchRecipes)
             </div>
         </div>
     </div>
+
+    <button 
+      @click="openCreateModal"
+      class="fixed bottom-28 right-8 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-white shadow-2xl shadow-emerald-200 hover:bg-emerald-700 hover:scale-110 active:scale-95 transition-all duration-300 group"
+      aria-label="Aggiungi nuova ricetta"
+    >
+      <PlusIcon class="h-8 w-8 transition-transform group-hover:rotate-90" />
+    </button>
+
     <AddRecipeModal :isOpen="isModalOpen" :recipeToEdit="selectedRecipe" @close="isModalOpen = false"
         @saved="handleSaved" />
 </template>
