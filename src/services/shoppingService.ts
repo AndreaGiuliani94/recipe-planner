@@ -11,18 +11,18 @@ export const shoppingService = {
     return data
   },
 
-  async toggleItem(id: string, completed: boolean) {
+  async toggleItem(id: string, is_owned: boolean) {
     const { error } = await supabase
       .from('shopping_list')
-      .update({ completed })
+      .update({ is_owned })
       .eq('id', id)
     if (error) throw error
   },
 
-  async addItem(name: string, groupId: string) {
+  async addItem(name: string, quantity: string, groupId: string) {
     const { data, error } = await supabase
       .from('shopping_list')
-      .insert([{ name, group_id: groupId, completed: false }])
+      .insert([{ name, group_id: groupId, quantity: quantity, is_owned: false }])
       .select()
     if (error) throw error
     return data

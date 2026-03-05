@@ -50,7 +50,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(email: string, password: string) {
     await authService.login(email, password);
     await initialize();
-    router.push('/profile');
+    router.push('/profilo');
   }
 
   async function handleCreateGroup(name: string) {

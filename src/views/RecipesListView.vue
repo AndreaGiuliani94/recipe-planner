@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { MagnifyingGlassIcon, BookOpenIcon, PlusIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import AddRecipeModal from '@/components/AddRecipeModal.vue'
 import { useRecipeStore } from '../stores/recipes'
@@ -37,9 +37,13 @@ const handleSaved = () => {
     recipeStore.loadRecipes() // Ricarica la lista aggiornata
 }
 
-onMounted(() => {
-    recipeStore.loadRecipes()
-    recipeStore.subscribe()
+onMounted(async () => {
+    await recipeStore.loadRecipes()
+    await recipeStore.subscribe()
+})
+
+onUnmounted(async () => {
+    await recipeStore.unsubscribe()
 })
 </script>
 

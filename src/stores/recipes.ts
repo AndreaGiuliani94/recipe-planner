@@ -3,16 +3,22 @@ import { ref } from "vue";
 import { useAuthStore } from "./auth";
 import { recipeService } from "@/services/recipeServices";
 import { supabase } from "@/lib/supabaseClient";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 
 export const useRecipeStore = defineStore("recipes", () => {
   const recipes = ref<any[]>([]);
   const isLoading = ref(false);
   const isLoaded = ref(false); // Flag per la cache
   const authStore = useAuthStore();
+  let activeChannel: RealtimeChannel | null;
 
   // Sottoscrizione Real-time
   async function subscribe() {
-    return supabase
+    if (activeChannel) {
+      await supabase.removeChannel(activeChannel);
+    }
+
+    activeChannel = supabase
       .channel("public:recipes")
       .on(
         "postgres_changes",
@@ -30,6 +36,13 @@ export const useRecipeStore = defineStore("recipes", () => {
         },
       )
       .subscribe();
+  }
+
+  async function unsubscribe(){
+    if (activeChannel) {
+      await supabase.removeChannel(activeChannel)
+      activeChannel = null;
+    }
   }
 
   // Carica le ricette solo se non sono già in memoria (cache)
@@ -93,6 +106,7 @@ export const useRecipeStore = defineStore("recipes", () => {
     recipes,
     isLoading,
     subscribe,
+    unsubscribe,
     loadRecipes,
     addRecipe,
     removeRecipe,

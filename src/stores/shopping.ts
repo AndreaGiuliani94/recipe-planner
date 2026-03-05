@@ -7,9 +7,13 @@ import { supabase } from '@/lib/supabaseClient'
 export const useShoppingStore = defineStore('shopping', () => {
   const items = ref<any[]>([])
   const authStore = useAuthStore()
+  let activeChannel: any = null
 
-  function subscribe() {
-    return supabase
+  async function subscribe() {
+    if (activeChannel) {
+      await supabase.removeChannel(activeChannel);
+    }
+    activeChannel = supabase
       .channel('public:shopping_list')
       .on('postgres_changes', { 
         event: '*', 
@@ -29,6 +33,13 @@ export const useShoppingStore = defineStore('shopping', () => {
       .subscribe()
   }
 
+  async function unsubscribe(){
+    if (activeChannel) {
+      await supabase.removeChannel(activeChannel)
+      activeChannel = null;
+    }
+  }
+
   async function fetchItems() {
     if (!authStore.activeGroupId) return
     items.value = await shoppingService.getAll(authStore.activeGroupId)
@@ -40,11 +51,11 @@ export const useShoppingStore = defineStore('shopping', () => {
     if (item) item.completed = completed
   }
 
-  async function add(name: string) {
+  async function add(name: string, quantity: string) {
     if (!authStore.activeGroupId) return
-    const newItem = await shoppingService.addItem(name, authStore.activeGroupId)
+    const newItem = await shoppingService.addItem(name, quantity, authStore.activeGroupId)
     items.value.push(newItem[0])
   }
 
-  return { items, subscribe, fetchItems, toggle, add }
+  return { items, subscribe, unsubscribe, fetchItems, toggle, add }
 })

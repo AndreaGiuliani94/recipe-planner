@@ -6,19 +6,25 @@ import { ShoppingCartIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/vue
 import { it } from 'date-fns/locale'
 import type { ShoppingItem } from '@/types'
 import { useShoppingStore } from '@/stores/shopping'
+import { usePlannerStore } from '@/stores/planner'
 
+const plannerStore = usePlannerStore();
 const shoppingStore = useShoppingStore()
-let subscription: any = null
-const shoppingList = ref<ShoppingItem[]>([])
 const isLoading = ref(true)
 
 const groupedShoppingList = computed(() => {
   const groups: Record<string, ShoppingItem[]> = {}
 
-  shoppingList.value.forEach(item => {
-    const name = item.name.toLowerCase().trim()
-    if (!groups[name]) groups[name] = []
-    groups[name].push(item)
+  plannerStore.entries.forEach(item => {
+    const recipe = item.recipes;
+    const ingredients: any[] = [];
+    ingredients.push(...recipe.ingredients)
+    ingredients.forEach( ing => {
+      ing.name.toLowerCase().trim()
+      if (!groups[ing.name]) 
+        groups[ing.name] = []
+      groups[ing.name]?.push(ing)}
+  )
   })
 
   return groups
@@ -30,43 +36,9 @@ const syncWithPlanner = async () => {
   const start = format(new Date(), 'yyyy-MM-dd')
   const end = format(addDays(new Date(), 6), 'yyyy-MM-dd')
 
-  // 1. Recupera i pasti dal planner
-  const { data: plannerData } = await supabase
-    .from('planner')
-    .select('recipes(ingredients(name, quantity))')
-    .gte('date', start).lte('date', end)
+  
+  await plannerStore.loadMeals(start, end);
 
-  // 2. Estrai tutti gli ingredienti "necessari" (senza sommarli, mantenendoli distinti)
-  const neededIngredients: { name: string, quantity: string }[] = []
-  plannerData?.forEach(p => {
-    const ings = (p.recipes as any)?.ingredients
-    if (ings) neededIngredients.push(...ings)
-  })
-
-  // 3. Recupera ciò che è già presente nella tabella shopping_list
-  const { data: existingItems } = await supabase.from('shopping_list').select('*')
-
-  // 4. Identifica i nuovi ingredienti che non sono ancora nella tabella DB
-  for (const ing of neededIngredients) {
-    const exists = existingItems?.find(ei =>
-      ei.name.toLowerCase() === ing.name.toLowerCase() &&
-      ei.quantity === ing.quantity
-    )
-
-    if (!exists) {
-      await supabase.from('shopping_list').insert([{
-        name: ing.name.toLowerCase(),
-        quantity: ing.quantity,
-        is_owned: false
-      }])
-    }
-  }
-
-  // 5. Pulisci gli ingredienti vecchi (opzionale: potresti voler cancellare quelli non più nel planner)
-
-  // Ricarica la lista finale dal DB
-  const { data: finalData } = await supabase.from('shopping_list').select('*').order('is_owned', { ascending: true })
-  shoppingList.value = finalData || []
   isLoading.value = false
 }
 
@@ -80,20 +52,13 @@ const toggleOwned = async (item: ShoppingItem) => {
     .eq('id', item.id)
 }
 
-const clearList = async () => {
-  if (confirm("Vuoi svuotare tutta la lista della spesa?")) {
-    await supabase.from('shopping_list').delete().neq('id', '00000000-0000-0000-0000-000000000000') // Delete all
-    shoppingList.value = []
-  }
-}
-
 onMounted(async () => {
-  await shoppingStore.fetchItems()
-  subscription = shoppingStore.subscribe()
+  await syncWithPlanner()
+  // await shoppingStore.subscribe()
 })
 
-onUnmounted(() => {
-  if (subscription) supabase.removeChannel(subscription)
+onUnmounted(async () => {
+  // await shoppingStore.unsubscribe()
 })
 </script>
 
@@ -118,10 +83,10 @@ onUnmounted(() => {
       <ArrowPathIcon class="h-8 w-8 text-emerald-500 animate-spin" />
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-2">
       <div v-for="(items, name) in groupedShoppingList" :key="name"
-        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex flex-col gap-3">
+        class="bg-white border border-gray-100 rounded-2xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
           <h3 class="font-bold text-gray-800 capitalize text-lg">{{ name }}</h3>
 
           <div class="flex flex-wrap gap-2">

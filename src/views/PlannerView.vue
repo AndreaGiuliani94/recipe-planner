@@ -1,40 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { supabase } from '../lib/supabaseClient'
-import { format, startOfWeek, addDays, subWeeks, addWeeks, isToday } from 'date-fns'
+import { format, startOfWeek, subWeeks, addWeeks, isToday } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { ArrowPathIcon, TrashIcon, CalendarDaysIcon, CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
 import AddRecipeModal from '../components/AddRecipeModal.vue'
-import { useAuthStore } from '@/stores/auth'
+import { usePlannerStore } from '@/stores/planner'
+import { useRecipeStore } from '@/stores/recipes'
 
-const authStore = useAuthStore()
-const currentWeekStart = ref<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }))
-const recipes = ref<any[]>([])
-const plannerEntries = ref<any[]>([])
+const plannerStore = usePlannerStore();
+const recipeStore = useRecipeStore();
 const isModalOpen = ref(false)
 const pendingSelection = ref<{ date: Date, meal: string } | null>(null)
-
-const weekDays = computed<Date[]>(() => {
-  return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart.value, i))
-})
-
-const fetchData = async () => {
-  const start = weekDays.value[0]
-  const end = weekDays.value[6]
-  if (!start || !end) return
-
-  const { data: rData } = await supabase.from('recipes').select('*').order('name')
-  recipes.value = rData || []
-
-  const { data: pData } = await supabase
-    .from('planner')
-    .select('*, recipes(name)')
-    .eq('group_id', authStore.activeGroupId)
-    .gte('date', format(start, 'yyyy-MM-dd'))
-    .lte('date', format(end, 'yyyy-MM-dd'))
-
-  plannerEntries.value = pData || []
-}
 
 const handleNewSelection = (date: Date, meal: string, value: string) => {
   if (value === "NEW_RECIPE") {
@@ -46,16 +23,10 @@ const handleNewSelection = (date: Date, meal: string, value: string) => {
 }
 
 const addRecipeToMeal = async (date: Date, mealType: string, recipeId: string) => {
-  await supabase.from('planner').insert({
-    date: format(date, 'yyyy-MM-dd'),
-    meal_type: mealType,
-    recipe_id: recipeId
-  })
-  fetchData()
+  await plannerStore.saveMeal(date, mealType, recipeId)
 }
 
 const onRecipeSaved = async (newId: string) => {
-  await fetchData()
   if (pendingSelection.value) {
     await addRecipeToMeal(pendingSelection.value.date, pendingSelection.value.meal, newId)
   }
@@ -63,18 +34,11 @@ const onRecipeSaved = async (newId: string) => {
 }
 
 const removeEntry = async (id: string) => {
-  const { error } = await supabase
-    .from('planner')
-    .delete()
-    .eq('id', id)
-
-  if (error) console.error(error)
-  else fetchData() // Ricarica per aggiornare la vista
+  await plannerStore.removeEntry(id)
 }
 
 const jumpToToday = () => {
-  currentWeekStart.value = startOfWeek(new Date(), { weekStartsOn: 1 })
-  fetchData()
+  plannerStore.currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
 }
 
 // Funzione per saltare a una data specifica
@@ -83,12 +47,14 @@ const goToDate = (event: Event) => {
   if (target.value) {
     const selectedDate = new Date(target.value)
     // Sincronizziamo l'inizio della settimana (Lunedì) basandoci sulla data scelta
-    currentWeekStart.value = startOfWeek(selectedDate, { weekStartsOn: 1 })
-    fetchData()
+    plannerStore.currentWeekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   }
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+  await plannerStore.init();
+  await recipeStore.loadRecipes();
+})
 </script>
 
 <template>
@@ -103,7 +69,7 @@ onMounted(fetchData)
           <div>
             <h1 class="text-2xl font-black text-gray-800 tracking-tight">Il mio Planner</h1>
             <p class="text-sm text-gray-500 font-medium">
-              Settimana del {{ format(currentWeekStart, 'd MMMM', { locale: it }) }}
+              Settimana del {{ format(plannerStore.currentWeekStart, 'd MMMM', { locale: it }) }}
             </p>
           </div>
         </div>
@@ -111,7 +77,7 @@ onMounted(fetchData)
   
       <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
   
-        <button @click="currentWeekStart = subWeeks(currentWeekStart, 1); fetchData()"
+        <button @click="plannerStore.currentWeekStart = subWeeks(plannerStore.currentWeekStart, 1)"
           class="p-2 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors">
           <ChevronLeftIcon class="h-6 w-6" />
         </button>
@@ -133,7 +99,7 @@ onMounted(fetchData)
           </div>
         </div>
   
-        <button @click="currentWeekStart = addWeeks(currentWeekStart, 1); fetchData()"
+        <button @click="plannerStore.currentWeekStart = addWeeks(plannerStore.currentWeekStart, 1)"
           class="p-2 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-emerald-600 transition-colors">
           <ChevronRightIcon class="h-6 w-6" />
         </button>
@@ -143,7 +109,7 @@ onMounted(fetchData)
     
 
     <div class="space-y-6">
-      <div v-for="day in weekDays" :key="day.toString()"
+      <div v-for="day in plannerStore.weekDays" :key="day.toString()"
         class="bg-white border rounded-2xl shadow-sm transition-all overflow-hidden"
         :class="[isToday(day) ? 'ring-2 ring-emerald-500 border-transparent shadow-emerald-100 shadow-lg' : 'border-gray-100']">
 
@@ -169,7 +135,7 @@ onMounted(fetchData)
 
             <div class="space-y-2 mb-4">
               <div
-                v-for="entry in plannerEntries.filter(e => e.date === format(day, 'yyyy-MM-dd') && e.meal_type === meal)"
+                v-for="entry in plannerStore.entries.filter(e => e.planned_date === format(day, 'yyyy-MM-dd') && e.meal_type === meal)"
                 :key="entry.id"
                 class="group flex items-center justify-between bg-gray-50 hover:bg-emerald-50 border border-gray-100 hover:border-emerald-200 p-3 rounded-xl transition-all">
                 <span class="text-sm font-medium text-gray-700 group-hover:text-emerald-900">{{ entry.recipes?.name
@@ -186,7 +152,7 @@ onMounted(fetchData)
                 @change="handleNewSelection(day, meal, ($event.target as HTMLSelectElement).value); ($event.target as HTMLSelectElement).value = ''"
                 class="appearance-none w-full text-sm bg-white border-2 border-dashed border-gray-200 text-gray-500 py-2 px-4 rounded-xl hover:border-emerald-400 hover:text-emerald-600 focus:outline-none transition-all cursor-pointer">
                 <option value="" disabled selected>+ Aggiungi un piatto...</option>
-                <option v-for="r in recipes" :key="r.id" :value="r.id">{{ r.name }}</option>
+                <option v-for="r in recipeStore.recipes" :key="r.id" :value="r.id">{{ r.name }}</option>
                 <option value="NEW_RECIPE" class="font-bold text-emerald-600">✨ Crea nuova ricetta...</option>
               </select>
             </div>
