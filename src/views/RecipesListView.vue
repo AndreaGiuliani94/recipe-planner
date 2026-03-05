@@ -1,26 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { supabase } from '../lib/supabaseClient'
 import { MagnifyingGlassIcon, BookOpenIcon, PlusIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
 import AddRecipeModal from '@/components/AddRecipeModal.vue'
+import { useRecipeStore } from '../stores/recipes'
 
+const recipeStore = useRecipeStore()
 const recipes = ref<any[]>([])
 const searchQuery = ref('')
-const isLoading = ref(true)
 const isModalOpen = ref(false)
 const selectedRecipe = ref<any>(null)
-
-const fetchRecipes = async () => {
-    isLoading.value = true
-    // Recuperiamo ricette + ingredienti in un'unica query
-    const { data } = await supabase
-        .from('recipes')
-        .select('*, ingredients(*)')
-        .order('name')
-
-    recipes.value = data || []
-    isLoading.value = false
-}
 
 // Logica di ricerca potente: cerca nel nome E negli ingredienti
 const filteredRecipes = computed(() => {
@@ -47,10 +35,10 @@ const openCreateModal = () => {
 }
 
 const handleSaved = () => {
-    fetchRecipes() // Ricarica la lista aggiornata
+    recipeStore.loadRecipes() // Ricarica la lista aggiornata
 }
 
-onMounted(fetchRecipes)
+onMounted(recipeStore.loadRecipes())
 </script>
 
 <template>
@@ -74,7 +62,7 @@ onMounted(fetchRecipes)
             </div>
         </div>
 
-        <div v-if="isLoading" class="flex justify-center py-20">
+        <div v-if="recipeStore.isLoading" class="flex justify-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
         </div>
 

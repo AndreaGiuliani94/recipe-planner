@@ -5,7 +5,9 @@ import { format, startOfWeek, addDays, subWeeks, addWeeks, isToday } from 'date-
 import { it } from 'date-fns/locale'
 import { ArrowPathIcon, TrashIcon, CalendarDaysIcon, CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
 import AddRecipeModal from '../components/AddRecipeModal.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const currentWeekStart = ref<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }))
 const recipes = ref<any[]>([])
 const plannerEntries = ref<any[]>([])
@@ -27,6 +29,7 @@ const fetchData = async () => {
   const { data: pData } = await supabase
     .from('planner')
     .select('*, recipes(name)')
+    .eq('group_id', authStore.activeGroupId)
     .gte('date', format(start, 'yyyy-MM-dd'))
     .lte('date', format(end, 'yyyy-MM-dd'))
 
