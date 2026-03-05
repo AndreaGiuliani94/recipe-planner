@@ -20,9 +20,7 @@ const handleAuth = async () => {
       alert("Controlla la tua email per confermare l'iscrizione!")
     } else {
       // 2. Login
-      await authService.login(email.value, password.value)
-      authStore.initialize()
-      router.push('/')
+      await authStore.login(email.value, password.value)
     }
   } catch (e: any) {
     alert(e.message)

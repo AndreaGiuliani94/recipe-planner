@@ -48,7 +48,7 @@ export const recipeService = {
       await supabase.from('ingredients').delete().eq('recipe_id', recipe.id)
     } else {
       // 1. INSERT Nuova Ricetta
-      const { data } = await supabase.from('recipes').insert([{ name: recipe.name, group_id: groupId }]).select().single()
+      const { data } = await supabase.from('recipes').insert([{ name: recipe.name.value, group_id: groupId }]).select().single()
       recipe.id = data.id
     }
 

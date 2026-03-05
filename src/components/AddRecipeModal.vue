@@ -6,11 +6,12 @@ import {
 } from '@headlessui/vue'
 import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { useRecipeStore } from '../stores/recipes'
+import type { Recipe } from '@/types'
 
 const recipeStore = useRecipeStore()
 const props = defineProps<{ 
   isOpen: boolean, 
-  recipeToEdit?: any
+  recipeToEdit?: Recipe
 }>()
 const emit = defineEmits(['close', 'saved'])
 
@@ -39,7 +40,7 @@ const saveRecipe = async () => {
   if (!recipeName.value) return
   isSaving.value = true
   try {
-    await recipeStore.upsertRecipe(props.recipeToEdit, ingredients.value)
+    await recipeStore.upsertRecipe(props.recipeToEdit == null ? { name: recipeName, id: null} : props.recipeToEdit, ingredients.value)
     emit('saved')
     closeModal()
   } catch (err) {
@@ -50,7 +51,7 @@ const saveRecipe = async () => {
 }
 
 const deleteRecipe = async () => {
-  if (!props.recipeToEdit) return
+  if (!props.recipeToEdit || !props.recipeToEdit.id) return
   const confirmDelete = confirm(`Sei sicuro di voler eliminare definitivamente "${props.recipeToEdit.name}"? Verrà rimossa anche dal planner.`)
   if (confirmDelete) {
     isDeleting.value = true

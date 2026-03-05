@@ -5,7 +5,6 @@ import AddRecipeModal from '@/components/AddRecipeModal.vue'
 import { useRecipeStore } from '../stores/recipes'
 
 const recipeStore = useRecipeStore()
-const recipes = ref<any[]>([])
 const searchQuery = ref('')
 const isModalOpen = ref(false)
 const selectedRecipe = ref<any>(null)
@@ -13,9 +12,9 @@ const selectedRecipe = ref<any>(null)
 // Logica di ricerca potente: cerca nel nome E negli ingredienti
 const filteredRecipes = computed(() => {
     const query = searchQuery.value.toLowerCase().trim()
-    if (!query) return recipes.value
+    if (!query) return recipeStore.recipes
 
-    return recipes.value.filter(recipe => {
+    return recipeStore.recipes.filter(recipe => {
         const matchName = recipe.name.toLowerCase().includes(query)
         const matchIngredient = recipe.ingredients.some((ing: any) =>
             ing.name.toLowerCase().includes(query)
@@ -38,7 +37,10 @@ const handleSaved = () => {
     recipeStore.loadRecipes() // Ricarica la lista aggiornata
 }
 
-onMounted(recipeStore.loadRecipes())
+onMounted(() => {
+    recipeStore.loadRecipes()
+    recipeStore.subscribe()
+})
 </script>
 
 <template>
@@ -96,12 +98,10 @@ onMounted(recipeStore.loadRecipes())
         </div>
     </div>
 
-    <button 
-      @click="openCreateModal"
-      class="fixed bottom-28 right-8 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-white shadow-2xl shadow-emerald-200 hover:bg-emerald-700 hover:scale-110 active:scale-95 transition-all duration-300 group"
-      aria-label="Aggiungi nuova ricetta"
-    >
-      <PlusIcon class="h-8 w-8 transition-transform group-hover:rotate-90" />
+    <button @click="openCreateModal"
+        class="fixed bottom-28 right-8 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-white shadow-2xl shadow-emerald-200 hover:bg-emerald-700 hover:scale-110 active:scale-95 transition-all duration-300 group"
+        aria-label="Aggiungi nuova ricetta">
+        <PlusIcon class="h-8 w-8 transition-transform group-hover:rotate-90" />
     </button>
 
     <AddRecipeModal :isOpen="isModalOpen" :recipeToEdit="selectedRecipe" @close="isModalOpen = false"

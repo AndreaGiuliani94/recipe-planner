@@ -18,10 +18,6 @@ const handleSaved = async () => {
   authStore.initialize()
 }
 
-onMounted(() => {
-  authStore.initialize()
-})
-
 </script>
 
 <template>

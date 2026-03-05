@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { supabase } from "../lib/supabaseClient";
 import { authService } from "@/services/authService";
+import router from "@/router";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<any>(null);
@@ -42,6 +43,14 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     userGroups.value = [];
     activeGroupId.value = null;
+    router.push('/login');
+  }
+
+  // Funzione per il login
+  async function login(email: string, password: string) {
+    await authService.login(email, password);
+    await initialize();
+    router.push('/profile');
   }
 
   async function handleCreateGroup(name: string) {
@@ -64,6 +73,7 @@ export const useAuthStore = defineStore("auth", () => {
     isAuthenticated,
     initialize,
     logout,
+    login,
     handleCreateGroup,
     setGroup,
   };

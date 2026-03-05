@@ -15,7 +15,7 @@ export const useShoppingStore = defineStore('shopping', () => {
         event: '*', 
         schema: 'public', 
         table: 'shopping_list',
-        filter: `group_id=eq.${authStore.groupId}`
+        filter: `group_id=eq.${authStore.activeGroupId}`
       }, (payload) => {
         if (payload.eventType === 'INSERT') {
           items.value.push(payload.new)
@@ -30,8 +30,8 @@ export const useShoppingStore = defineStore('shopping', () => {
   }
 
   async function fetchItems() {
-    if (!authStore.groupId) return
-    items.value = await shoppingService.getAll(authStore.groupId)
+    if (!authStore.activeGroupId) return
+    items.value = await shoppingService.getAll(authStore.activeGroupId)
   }
 
   async function toggle(id: string, completed: boolean) {
@@ -41,7 +41,8 @@ export const useShoppingStore = defineStore('shopping', () => {
   }
 
   async function add(name: string) {
-    const newItem = await shoppingService.addItem(name, authStore.groupId)
+    if (!authStore.activeGroupId) return
+    const newItem = await shoppingService.addItem(name, authStore.activeGroupId)
     items.value.push(newItem[0])
   }
 
