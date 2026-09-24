@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabaseClient'
 import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -42,16 +43,19 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const authStore = useAuthStore()
-  
-  // Se la rotta richiede auth e l'utente non è loggato
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return '/login'
+  const authStore = useAuthStore();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (to.meta.requiresAuth && !session) {
+    return '/login';
   }
-
-  // Se l'utente è loggato ma non ha ancora un gruppo (e non è già nella pagina setup)
-  if (authStore.isAuthenticated && !authStore.activeGroupId && to.path !== '/setup-group') {
-    return '/setup-group'
+  if (session) {
+    await authStore.initialize();
+    if (to.path === '/login') {
+      return '/profilo';
+    }
+    if (!authStore.activeGroupId && to.path !== '/setup-group') {
+      return '/setup-group';
+    }
   }
 })
 

@@ -72,7 +72,7 @@ const handleGoogleLogin = async () => {
             <div class="w-full border-t border-gray-300"></div>
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-gray-50 text-gray-500">Oppure continua con</span>
+            <span class="px-2 bg-white text-gray-500">Oppure</span>
           </div>
         </div>
 

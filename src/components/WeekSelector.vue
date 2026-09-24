@@ -48,7 +48,7 @@ const handleDateChange = (newDate: Date | null) => {
       </div>
     </div>
 
-    <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <div class="bg-white p-1 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
       
       <!-- Tasto Indietro: emette 'prev' -->
         <button @click="emit('prev')"

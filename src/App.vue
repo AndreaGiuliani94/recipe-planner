@@ -12,9 +12,9 @@ onMounted(() => {
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
       await authStore.initialize()
-      if (router.currentRoute.value.path === '/login') {
-        router.push('/profilo')
-      }
+    }
+    if (event === 'SIGNED_OUT') {
+      router.push('/login')
     }
   })
 })
