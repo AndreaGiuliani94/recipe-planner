@@ -1,6 +1,23 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import AppNavbar from './components/AppNavbar.vue'
+import { useAuthStore } from './stores/auth.ts'
+import { onMounted } from 'vue'
+import { supabase } from './lib/supabaseClient.ts'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+onMounted(() => {
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN') {
+      await authStore.initialize()
+      if (router.currentRoute.value.path === '/login') {
+        router.push('/profilo')
+      }
+    }
+  })
+})
 </script>
 
 <template>

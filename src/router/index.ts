@@ -12,34 +12,30 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: PlannerView, 
+      component: () => import('../views/PlannerView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/profilo',
       name: 'profile',
-      // Caricamento pigro (lazy-loading) per performance migliori
       component: () => import('../views/ProfileView.vue'), 
       meta: { requiresAuth: true }
     },
     {
       path: '/ricette',
       name: 'recipes',
-      // Caricamento pigro (lazy-loading) per performance migliori
       component: () => import('../views/RecipesListView.vue'), 
       meta: { requiresAuth: true }
     },
     {
       path: '/setup-group',
       name: 'setup-group',
-      // Caricamento pigro (lazy-loading) per performance migliori
       component: () => import('../views/SetupGroupView.vue'), 
       meta: { requiresAuth: true }
     },
     {
       path: '/spesa',
       name: 'shopping-chart',
-      // Caricamento pigro (lazy-loading) per performance migliori
       component: () => import('../views/ShoppingListView.vue'), 
       meta: { requiresAuth: true }
     }

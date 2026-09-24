@@ -83,7 +83,7 @@ onUnmounted(async () => {
       <ArrowPathIcon class="h-8 w-8 text-emerald-500 animate-spin" />
     </div>
 
-    <div v-else class="space-y-2">
+    <div v-else-if="groupedShoppingList && Object.keys(groupedShoppingList).length > 0" class="space-y-2">
       <div v-for="(items, name) in groupedShoppingList" :key="name"
         class="bg-white border border-gray-100 rounded-2xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center gap-3">
@@ -100,6 +100,11 @@ onUnmounted(async () => {
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-else class="space-y-2">
+      <p class="text-gray-500 font-medium text-center">Nessun ingrediente trovato per questa settimana.</p>
+      <p class="text-gray-400 text-sm text-center">Assicurati di aver pianificato i pasti per questa settimana.</p>
     </div>
   </div>
 </template>

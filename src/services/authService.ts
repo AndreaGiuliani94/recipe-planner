@@ -26,6 +26,24 @@ export const authService = {
   },
 
   /**
+   * Avvia la procedura di Login tramite Google
+   */
+  async loginWithGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        // Opzionale: dove rimandare l'utente dopo il login.
+        // Se stai sviluppando in locale, usa http://localhost:5173
+        // Se l'app è pubblicata, usa l'URL del tuo sito.
+        redirectTo: window.location.origin
+      }
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  /**
    * Logout completo
    */
   async logout() {
