@@ -23,8 +23,8 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
-    "@tsconfig/node24": "^24.0.4",
-    "@types/node": "^24.0.0",
+    "@tsconfig/node26": "^26.0.0",
+    "@types/node": "^26.0.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.9.1",
     "autoprefixer": "^10.4.27",
@@ -37,6 +37,6 @@
     "vue-tsc": "^3.3.11"
   },
   "engines": {
-    "node": "24.x"
+    "node": "26.x"
   }
 }
