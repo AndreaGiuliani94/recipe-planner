@@ -16,7 +16,7 @@ async function pingDatabase() {
   console.log('Invio del segnale di risveglio a Supabase...')
   
   // Eseguiamo una query semplicissima (legge una riga da una tabella a tua scelta, es. 'profiles')
-  const { data, error } = await supabase.from('recipes').select('id').limit(1)
+  const { data, error } = await supabase.from('recipes').select('*').limit(1)
 
   if (error) {
     console.error('Errore durante il ping:', error.message)
