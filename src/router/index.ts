@@ -1,5 +1,4 @@
 import { useAuthStore } from '@/stores/auth'
-import PlannerView from '@/views/PlannerView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -7,36 +6,36 @@ const router = createRouter({
   routes: [
     { 
       path: '/login', 
-      component: () => import('../views/LoginView.vue') 
+      component: () => import('@/views/LoginView.vue') 
     },
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/PlannerView.vue'),
+      component: () => import('@/views/PlannerView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/profilo',
       name: 'profile',
-      component: () => import('../views/ProfileView.vue'), 
+      component: () => import('@/views/ProfileView.vue'), 
       meta: { requiresAuth: true }
     },
     {
       path: '/ricette',
       name: 'recipes',
-      component: () => import('../views/RecipesListView.vue'), 
+      component: () => import('@/views/RecipesListView.vue'), 
       meta: { requiresAuth: true }
     },
     {
       path: '/setup-group',
       name: 'setup-group',
-      component: () => import('../views/SetupGroupView.vue'), 
+      component: () => import('@/views/SetupGroupView.vue'), 
       meta: { requiresAuth: true }
     },
     {
       path: '/spesa',
       name: 'shopping-chart',
-      component: () => import('../views/ShoppingListView.vue'), 
+      component: () => import('@/views/ShoppingListView.vue'), 
       meta: { requiresAuth: true }
     }
   ]

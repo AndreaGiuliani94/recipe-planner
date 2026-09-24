@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router'
-import AppNavbar from './components/AppNavbar.vue'
-import { useAuthStore } from './stores/auth.ts'
+import AppNavbar from '@/components/AppNavbar.vue'
+import { useAuthStore } from '@/stores/auth.ts'
 import { onMounted } from 'vue'
-import { supabase } from './lib/supabaseClient.ts'
+import { supabase } from '@/lib/supabaseClient.ts'
 
 const router = useRouter()
 const authStore = useAuthStore()

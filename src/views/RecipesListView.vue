@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { MagnifyingGlassIcon, BookOpenIcon, PlusIcon, PencilSquareIcon } from '@heroicons/vue/24/outline'
-import AddRecipeModal from '@/components/AddRecipeModal.vue'
-import { useRecipeStore } from '../stores/recipes'
+import { useRecipeStore } from '@/stores/recipes'
+import AddRecipeModal from '@/components/modals/AddRecipeModal.vue'
 
 const recipeStore = useRecipeStore()
 const searchQuery = ref('')

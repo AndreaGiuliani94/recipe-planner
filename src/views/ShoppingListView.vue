@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import { format, addDays } from 'date-fns'
 import { ShoppingCartIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import { it } from 'date-fns/locale'

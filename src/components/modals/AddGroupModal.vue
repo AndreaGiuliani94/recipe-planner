@@ -15,18 +15,6 @@ const emit = defineEmits(['close', 'saved'])
 
 const groupName = ref('')
 const isSaving = ref(false)
-const isDeleting = ref(false)
-
-// Reazione all'apertura: se c'è una ricetta da modificare, carichiamo i dati
-// watch(() => props.isOpen, (newVal) => {
-//   if (newVal && props.recipeToEdit) {
-//     recipeName.value = props.recipeToEdit.name
-//     // Cloniamo gli ingredienti per evitare modifiche dirette prima del salva
-//     ingredients.value = props.recipeToEdit.ingredients.map((i: any) => ({ ...i }))
-//   } else if (newVal) {
-//     resetFormState()
-//   }
-// })
 
 const saveNewGroup = async () => {
   if (!groupName.value) return
@@ -41,24 +29,6 @@ const saveNewGroup = async () => {
     isSaving.value = false
   }
 }
-
-// const deleteRecipe = async () => {
-//   if (!props.recipeToEdit) return
-//   const confirmDelete = confirm(`Sei sicuro di voler eliminare definitivamente "${props.recipeToEdit.name}"? Verrà rimossa anche dal planner.`)
-//   if (confirmDelete) {
-//     isDeleting.value = true
-//     try {
-//       await recipeStore.removeRecipe(props.recipeToEdit.id)
-//       emit('saved')
-//       closeModal()
-//     } catch (err) {
-//       alert("Errore durante l'eliminazione")
-//       console.error(err)
-//     } finally {
-//       isDeleting.value = false
-//     }
-//   }
-// }
 
 const resetFormState = () => {
   groupName.value = ''
@@ -110,32 +80,6 @@ const closeModal = () => {
                     />
                   </div>
 
-                  <!-- <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Ingredienti</label>
-                    <div v-for="(ing, idx) in ingredients" :key="idx" class="flex gap-2 mb-2 items-center">
-                      <input 
-                        v-model="ing.name" 
-                        placeholder="Nome"
-                        class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
-                      />
-                      <input 
-                        v-model="ing.quantity" 
-                        placeholder="Q.tà"
-                        class="w-24 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
-                      />
-                      <button @click="removeIngredientRow(idx)" class="text-red-400 hover:text-red-600">
-                        <TrashIcon class="h-5 w-5" />
-                      </button>
-                    </div>
-                    
-                    <button 
-                      type="button" 
-                      @click="addIngredientRow"
-                      class="mt-2 inline-flex items-center text-sm font-medium text-emerald-600 hover:text-emerald-500"
-                    >
-                      <PlusIcon class="h-4 w-4 mr-1" /> Aggiungi ingrediente
-                    </button>
-                  </div> -->
                 </div>
               </div>
 
@@ -149,14 +93,6 @@ const closeModal = () => {
                   {{ isSaving ? 'Salvataggio...' : 'Salva Ricetta' }}
                 </button>
                 <div class="flex gap-2">
-                  <!-- <button 
-                    v-if="props.recipeToEdit"
-                    type="button" 
-                    @click="deleteRecipe"
-                    class="text-red-500 hover:text-red-700 hover:bg-red-50 transition-all mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300"
-                  >
-                    <TrashIcon class="h-4 w-4" /> Elimina
-                  </button> -->
                   <button 
                     type="button" 
                     @click="closeModal"

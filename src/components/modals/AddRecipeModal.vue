@@ -5,8 +5,8 @@ import {
   TransitionChild, TransitionRoot 
 } from '@headlessui/vue'
 import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import { useRecipeStore } from '../stores/recipes'
 import type { Recipe } from '@/types'
+import { useRecipeStore } from '@/stores/recipes'
 
 const recipeStore = useRecipeStore()
 const props = defineProps<{ 

@@ -2,7 +2,7 @@
 import { UserCircleIcon, UsersIcon, ClipboardIcon, ArrowRightStartOnRectangleIcon, PlusIcon, ArrowRightEndOnRectangleIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref } from 'vue';
-import AddGroupModal from '@/components/AddGroupModal.vue';
+import AddGroupModal from '@/components/modals/AddGroupModal.vue';
 
 const authStore = useAuthStore();
 const isModalOpen = ref(false);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'vue-router'
 import { PlusIcon, UserGroupIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
