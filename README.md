@@ -1,42 +1,92 @@
-# recipe-planner
+# EasyPlanner
 
-This template should help get you started developing with Vue 3 in Vite.
+This project is a private application intended for private use only.
 
-## Recommended IDE Setup
+EasyPlanner is a Vue 3 recipe planning app designed to help manage weekly meals, recipes, shopping lists, and household planning. It uses Supabase for authentication and data storage, and it is focused on a personal or private workflow rather than public distribution.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Overview
 
-## Recommended Browser Setup
+The app includes:
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- User authentication with Supabase
+- Group setup for a household or private planning context
+- Weekly meal planner
+- Recipe management and list browsing
+- Shopping list generation
+- User profile management
 
-## Type Support for `.vue` Imports in TS
+## Tech Stack
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Vue 3
+- Vite
+- TypeScript
+- Vue Router
+- Pinia
+- Supabase
+- Tailwind CSS
 
-## Customize configuration
+## Project Structure
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- `src/views/` – app screens such as login, planner, profile, recipes, and shopping list
+- `src/stores/` – Pinia stores for app state
+- `src/router/` – route configuration and auth guards
+- `src/services/` – external service integrations
+- `src/lib/` – reusable library utilities
+- `src/components/` – reusable UI components
 
-## Project Setup
+## Environment Variables
 
-```sh
+Create a `.env` file based on `.env.example`:
+
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Installation
+
+Using pnpm (recommended):
+
+```bash
+pnpm install
+```
+
+Or with npm:
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+## Run locally
 
-```sh
+```bash
+pnpm dev
+```
+
+or
+
+```bash
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Production build
 
-```sh
+```bash
+pnpm build
+```
+
+or
+
+```bash
 npm run build
 ```
+
+## Notes
+
+- This repository is intended for private personal use.
+- It is not meant to be published as a public app or shared as a general-purpose product.
+- Configuration and data access may be tailored to a specific user/group setup.
+
+## License
+
+This project is private and intended for personal use only.
