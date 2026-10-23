@@ -15,15 +15,31 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 async function pingDatabase() {
   console.log('Invio del segnale di risveglio a Supabase...')
   
-  // Eseguiamo una query semplicissima (legge una riga da una tabella a tua scelta, es. 'profiles')
-  const { data, error } = await supabase.from('recipes').select('*').limit(1)
+  const now = new Date().toISOString()
 
-  if (error) {
-    console.error('Errore durante il ping:', error.message)
+  const { data: insertData, error: insertError } = await supabase
+    .from('keep_alive_logs')
+    .insert([{ pinged_at: now }])
+
+  if (insertError) {
+    console.error('Errore durante la scrittura:', insertError.message)
     process.exit(1)
   }
 
-  console.log('Database risvegliato con successo! Dati ricevuti:', data)
+  console.log(`Scrittura completata con successo! Data inserita: ${now}`)
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  
+  const { error: deleteError } = await supabase
+    .from('keep_alive_logs')
+    .delete()
+    .lt('pinged_at', sevenDaysAgo)
+
+  if (deleteError) {
+    console.warn('Nota: impossibile pulire i vecchi log, ma il ping è andato a buon fine.', deleteError.message)
+  } else {
+    console.log('Pulizia dei vecchi log completata.')
+  }
 }
 
 pingDatabase()
